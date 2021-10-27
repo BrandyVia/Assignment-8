@@ -1,0 +1,123 @@
+---
+title: "DEA"
+output:
+  pdf_document: default
+  html_notebook:
+    highlight: textmate
+    theme: cerulean
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+
+****
+
+## Using Benchmarking Libraries for DEA
+
+We will now run DEA analysis using the benchmarking library.
+
+```{r}
+library(Benchmarking)
+```
+
+Now, we read our input data. We will read the data as input and output as vectors. Remember our problem has 6 DMUs with staff hours and supplies as input and number of patient-days reimbursed by third parties and number of patient-days reimbursed privately as outputs.
+
+```{r}
+x <- matrix(c(150,400,320,520,350,320,0.2,0.7,1.2,2.0,1.2,0.7), ncol = 2)
+y <- matrix(c(14000,14000,42000,28000,19000,14000,3500,21000,10500,42000,25000, 15000),ncol = 2)
+colnames(y) <- c("Reimbursed Patient-Days","Privately Paid Patient-Days")
+colnames(x) <- c("Staff Hours per Day", "Supplies per Day")
+x
+y
+```
+
+We now run the DEA analysis. We use the option of FDH
+```{r}
+e <- dea(x,y,RTS = "fdh")            # provide the input and output 
+e
+```
+**Comment**: The results indicate that all facilities have an efficiency rating of 1 which means they are efficient. 
+
+```{r}
+peers(e)                             # identify the peers
+lambda(e)                            # identify the relative weights given to the peers
+
+```
+**Comment**: Since all facilities are running efficiently, the "peer" is itself.
+
+We now run the DEA analysis. We use the option of CRS. 
+```{r}
+e <- dea(x,y,RTS = "crs")            # provide the input and output 
+e
+```
+**Comment**: The results indicate that facilities 1-4 are efficient while facility 5 and 6 could use some improvements.
+
+```{r}
+peers(e)                             # identify the peers
+lambda(e)                            # identify the relative weights given to the peers
+
+```
+**Comment**: The results from the "peer" indicate that inefficient facility 5 and 6 could try to model facility 1, 2 and 4 to improve their efficiency. For facility 5, the relative weight given to facility 1, 2 and 4 are 0.2, 0.08 and 0.54 respectively. On the other hand for facility 6, the relative weight given to facility 1, 2 and 4 are 0.34, 0.40 and 0.13 respectively.
+
+We now run the DEA analysis. We use the option of VRS
+```{r}
+e <- dea(x,y,RTS = "vrs")            # provide the input and output 
+e
+```
+**Comment**: The results indicate that facilities 1-5 are efficient while facility 6 could use some improvements.
+
+```{r}
+peers(e)                             # identify the peers
+lambda(e)                            # identify the relative weights given to the peers
+
+```
+**Comment**: The results from the "peer" indicate that inefficient facility 6 could try to model facility 1, 2 and 5 to improve their efficiency. For facility 6, the relative weight given to facility 1, 2 and 5 are 0.4, 0.34 and 0.26 respectively. 
+
+We now run the DEA analysis. We use the option of IRS.
+```{r}
+e <- dea(x,y,RTS = "irs")            # provide the input and output 
+e
+```
+**Comment**: The results indicate that facilities 1-5 are efficient while facility 6 could use some improvements. Note that this is exactly the same as the VRS assumption.
+
+```{r}
+peers(e)                             # identify the peers
+lambda(e)                            # identify the relative weights given to the peers
+
+```
+**Comment**: The results from the "peer" indicate that inefficient facility 6 could try to model facility 1, 2 and 5 to improve their efficiency. For facility 6, the relative weight given to facility 1, 2 and 5 are 0.4, 0.34 and 0.26 respectively. Again this is the same as the VRS assumption.
+
+We now run the DEA analysis. We use the option of DRS
+```{r}
+e <- dea(x,y,RTS = "drs")            # provide the input and output 
+e
+```
+**Comment**: The results indicate that facilities 1-4 are efficient while facility 5 and 6 could use some improvements. Note that this is the same as the CRS assumption.
+
+```{r}
+peers(e)                             # identify the peers
+lambda(e)                            # identify the relative weights given to the peers
+
+```
+**Comment**: The results from the "peer" indicate that inefficient facility 5 and 6 could try to model facility 1, 2 and 4 to improve their efficiency. For facility 5, the relative weight given to facility 1, 2 and 4 are 0.2, 0.08 and 0.54 respectively. On the other hand for facility 6, the relative weight given to facility 1, 2 and 4 are 0.34, 0.40 and 0.13 respectively. Note that this is the same as the CRS assumption.
+
+We now run the DEA analysis. We use the option of FRH
+```{r}
+e <- dea(x,y,RTS = "add")            # provide the input and output 
+e
+```
+**Comment**: The results indicate that all facilities have an efficiency rating of 1 which means they are efficient. This is the same as the FDH assumption.
+
+```{r}
+peers(e)                             # identify the peers
+lambda(e)                            # identify the relative weights given to the peers
+
+```
+**Comment**: Since all facilities are running efficiently, the "peer" is itself. This is  the same as the FDH assumption.
+
+**Conclusion**: The FDH and FRH models show all facilities to be efficient. The reason is possibly due to the fact that they do not employ convexity. When convexity is assumed, the model is better at differentiating between the average performance and the best practice. 
+
